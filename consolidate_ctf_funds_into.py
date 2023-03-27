@@ -1,37 +1,20 @@
 #!/usr/bin/env python3
-
+# -*- coding: utf-8 -*-
 import sys
-from ethpwn import *
+from ethpwn.prelude import *
 
-#!/usr/bin/env python3
-
-from web3 import Web3
-from time import sleep
-
-from ethpwn import context
-from ethpwn.contract import CONTRACT_METADATA
-from ethpwn.transactions import transfer_funds
-from ethpwn.currency_utils import ether, wei
-
-MY_WALLET = get_wallet_by_name('Laptop CTF Metamask')
-assert MY_WALLET is not None
-
-context.log_level = 'DEBUG'
-
-context.connect_http()
-context.default_from_addr = MY_WALLET.address
-context.default_signing_key = MY_WALLET.private_key
+context.connect_http(sys.argv[1])
 
 print("Current balance of wallets:")
-for address, wallet in config.GLOBAL_CONFIG['wallets'].items():
-    balance = context.w3.eth.get_balance(wallet.address)
-    print(f"{wallet.name} [{wallet.address}]: {balance} [ {context.w3.from_wei(balance, 'ether')} ether ]")
+for address, wallet in all_wallets():
+    balance = wallet.balance()
+    print(f"{wallet.name} [{wallet.address}]: {balance} [ {ether(balance)} ether ]")
 
 if len(sys.argv) == 2:
-    target_wallet = get_wallet_by_name(sys.argv[1])
+    target_wallet = get_wallet(sys.argv[1])
     assert target_wallet is not None, f"Could not find wallet {sys.argv[1]!r}"
 
-    for address, wallet in config.GLOBAL_CONFIG['wallets'].items():
+    for address, wallet in all_wallets():
         if wallet.name == target_wallet.name:
             continue
 
