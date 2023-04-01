@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "exploit_templates/Destructible.sol";
 import "exploit_templates/Targeted.sol";
 
-import "doubleentrypoint/contract.sol";
+import "doubleentrypoint/exploit.sol";
 
 contract DetectionBot is IDetectionBot {
     DoubleEntryPoint dep_token;
@@ -39,15 +39,27 @@ contract DetectionBot is IDetectionBot {
     }
 }
 
-contract Exploit is Destructible, Targeted {
-    DetectionBot bot;
+contract DeployDetection is Destructible, Targeted {
+    DetectionBot public detection_bot;
     DoubleEntryPoint dep_token;
+    Forta forta;
+    LegacyToken legacy_token;
+    CryptoVault crypto_vault;
     constructor(address target_addr) payable Targeted(target_addr) {
-        bot = new DetectionBot(target_addr);
         dep_token = DoubleEntryPoint(target_addr);
+        forta = dep_token.forta();
+        legacy_token = LegacyToken(dep_token.delegatedFrom());
+        crypto_vault = CryptoVault(dep_token.cryptoVault());
+
+        detection_bot = new DetectionBot(target_addr);
     }
-    function exploit() public payable {
-        Forta forta = dep_token.forta();
-        forta.setDetectionBot(address(bot));
+    function deploy() public payable {
+        forta.setDetectionBot(address(detection_bot));
+
+        // now delegateCall the sweepToken function so it comes from the player
+        // and the detection bot will be triggered
+        address(crypto_vault).delegatecall(
+            abi.encodeWithSignature("sweepToken(address)", address(legacy_token))
+        );
     }
 }
