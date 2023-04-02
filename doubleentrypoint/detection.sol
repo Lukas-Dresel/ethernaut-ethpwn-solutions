@@ -55,11 +55,5 @@ contract DeployDetection is Destructible, Targeted {
     }
     function deploy() public payable {
         forta.setDetectionBot(address(detection_bot));
-
-        // now delegateCall the sweepToken function so it comes from the player
-        // and the detection bot will be triggered
-        address(crypto_vault).delegatecall(
-            abi.encodeWithSignature("sweepToken(address)", address(legacy_token))
-        );
     }
 }
