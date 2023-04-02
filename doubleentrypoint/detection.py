@@ -4,6 +4,7 @@ import argparse
 import os
 from pathlib import Path
 import sys
+from time import sleep
 from ethpwn.prelude import *
 
 parser = argparse.ArgumentParser()
@@ -29,7 +30,7 @@ CONTRACT_METADATA.compiler.add_import_remappings({
 })
 
 # import ipdb; ipdb.set_trace()
-CONTRACT_METADATA.add_solidity_files([FILE_DIR / 'exploit.sol'])
+CONTRACT_METADATA.add_solidity_files([FILE_DIR / 'detection.sol'])
 
 dep_token = CONTRACT_METADATA['DoubleEntryPoint'].get_contract_at(ARGS.proxy_addr)
 print(f"DoubleEntryPointToken contract is at {dep_token.address}")
@@ -39,9 +40,13 @@ legacy_token = CONTRACT_METADATA['LegacyToken'].get_contract_at(dep_token.functi
 print(f"LegacyToken contract is at {legacy_token.address}")
 forta = CONTRACT_METADATA['Forta'].get_contract_at(dep_token.functions.forta().call())
 print(f"Forta contract is at {forta.address}")
-import ipdb; ipdb.set_trace()
 
-with CONTRACT_METADATA['Exploit'].deploy_destructible(ARGS.proxy_addr, force=ARGS.force) as (tx_hash, target):
-    print(f"Exploit contract is at {target.address}")
+with CONTRACT_METADATA['DeployDetection'].deploy_destructible(ARGS.proxy_addr, force=ARGS.force) as (tx_hash, deployer):
+    print(f"DetectionDeployer contract is at {deployer.address}")
 
-    transact(target.functions.exploit(), force=ARGS.force)
+    detection_bot = deployer.functions.detection_bot().call()
+    print(f"DetectionBot contract is at {detection_bot}")
+    sleep(1)
+
+    transact(deployer.functions.deploy(), force=ARGS.force)
+
