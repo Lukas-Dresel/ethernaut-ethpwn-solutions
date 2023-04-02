@@ -41,12 +41,9 @@ print(f"LegacyToken contract is at {legacy_token.address}")
 forta = CONTRACT_METADATA['Forta'].get_contract_at(dep_token.functions.forta().call())
 print(f"Forta contract is at {forta.address}")
 
-with CONTRACT_METADATA['DeployDetection'].deploy_destructible(ARGS.proxy_addr, force=ARGS.force) as (tx_hash, deployer):
-    print(f"DetectionDeployer contract is at {deployer.address}")
+tx_hash, detection_bot = CONTRACT_METADATA['DetectionBot'].deploy(ARGS.proxy_addr, force=ARGS.force)
+print(f"DetectionBot contract is at {detection_bot.address}")
 
-    detection_bot = deployer.functions.detection_bot().call()
-    print(f"DetectionBot contract is at {detection_bot}")
-    sleep(1)
-
-    transact(deployer.functions.deploy(), force=ARGS.force)
-
+sleep(1)
+print(f"Registering detection bot ...")
+transact(forta.functions.setDetectionBot(detection_bot.address), force=ARGS.force)
