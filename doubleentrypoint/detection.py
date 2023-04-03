@@ -30,7 +30,7 @@ CONTRACT_METADATA.compiler.add_import_remappings({
 })
 
 # import ipdb; ipdb.set_trace()
-CONTRACT_METADATA.add_solidity_files([FILE_DIR / 'detection.sol'])
+CONTRACT_METADATA.add_contracts_from_solidity_files([FILE_DIR / 'detection.sol'])
 
 dep_token = CONTRACT_METADATA['DoubleEntryPoint'].get_contract_at(ARGS.proxy_addr)
 print(f"DoubleEntryPointToken contract is at {dep_token.address}")
@@ -40,6 +40,7 @@ legacy_token = CONTRACT_METADATA['LegacyToken'].get_contract_at(dep_token.functi
 print(f"LegacyToken contract is at {legacy_token.address}")
 forta = CONTRACT_METADATA['Forta'].get_contract_at(dep_token.functions.forta().call())
 print(f"Forta contract is at {forta.address}")
+
 
 tx_hash, detection_bot = CONTRACT_METADATA['DetectionBot'].deploy(ARGS.proxy_addr, force=ARGS.force)
 print(f"DetectionBot contract is at {detection_bot.address}")
