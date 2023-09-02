@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "exploit_templates/Destructible.sol";
 import "exploit_templates/Targeted.sol";
 
-import "doubleentrypoint/exploit.sol";
+import "exploit.sol";
 
 contract DetectionBot is IDetectionBot {
     DoubleEntryPoint dep_token;

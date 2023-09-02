@@ -10,25 +10,16 @@ from ethpwn import *
 parser = argparse.ArgumentParser()
 parser.add_argument('proxy_addr', type=str)
 parser.add_argument('--force', action='store_true', help="Force the exploit even if estimage_gas says it will fail")
-parser.add_argument('--wallet', type=str, default='Laptop CTF Metamask', help="Wallet to use for the exploit transaction")
 ARGS = parser.parse_args()
 
 context.log_level = 'DEBUG'
 
-MY_WALLET = get_wallet(ARGS.wallet)
-assert MY_WALLET is not None
-context.default_from_addr = MY_WALLET.address
-context.default_signing_key = MY_WALLET.private_key
-
 FILE_DIR = Path(__file__).parent.resolve()
-solidity_includes = FILE_DIR.parent / '__solidity_includes'
+solidity_includes = FILE_DIR.parent / 'solidity-includes'
 
-CONTRACT_METADATA.compiler.add_import_remappings({
+compile_contracts([FILE_DIR / 'detection.sol'], import_remappings={
     'openzeppelin-contracts-08': solidity_includes / 'openzeppelin-contracts-0.8' / 'contracts',
 })
-
-
-CONTRACT_METADATA.compile_solidity_files([FILE_DIR / 'detection.sol'])
 
 dep_token = CONTRACT_METADATA['DoubleEntryPoint'].get_contract_at(ARGS.proxy_addr)
 print(f"DoubleEntryPointToken contract is at {dep_token.address}")
